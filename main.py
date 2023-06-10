@@ -5,14 +5,14 @@ import time
 import cv2
 import easyocr
 
-model = YOLO('yolov8n.pt')
+model = YOLO('custom_yolov8_model.pt')
 
 quit_cam = 0
 
 # static camera seting
 camera_width = 640
 camera_height = 384
-frames_per_sec_for_camera = 1
+frames_per_sec_for_camera = 30
 
 reader = easyocr.Reader(['en'], gpu = True)
 
@@ -21,8 +21,9 @@ time.sleep(1)
 
 while quit_cam == 0:
     time.sleep(1/frames_per_sec_for_camera)
-    cur_image = video_stream.read() 
-    results = model.predict(source = cur_image, show = True)
+    #cur_image = video_stream.read() 
+    cur_image = cv2.imread('Cars9_png.rf.ab2a94830c4e1b11aa2611a3f3ee0212.jpg')
+    results = model.predict(source = cur_image, show = True, hide_labels = True, vid_stride = frames_per_sec_for_camera)
 
     for result in results:
         boxes = result.boxes.cpu().numpy()                         # get boxes on cpu in numpy
@@ -32,8 +33,22 @@ while quit_cam == 0:
             img = cur_image[r[1]:r[3], r[0]:r[2]]
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            #cv2.imshow('klatka',img)
+            cv2.imshow('klatka',img)
             
+            result = reader.readtext(gray)
+
+            text = ''
+
+            for res in result:
+                print(res)
+                if len(result) == 1:
+                    text = res[1]
+                
+                if len(result) > 1 and len(res[1]) > 6 and res[2] > 0.2:
+                    text = res[1]
+            
+            
+            print("UwU")
 
     #check if 'e' key is pressed, if so exit mian loop
     key = cv2.waitKey(1) & 0xFF
