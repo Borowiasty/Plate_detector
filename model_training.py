@@ -1,5 +1,6 @@
-#Use this file ONLY when you want your model to be trained, this file will train new model, which will replace previously used, allready 
-#trained YOLOv8 model
+'''
+    Use this file ONLY when you want your model to be trained, this file will train new model, also will be working for aproxima 1 - 2 hours
+'''
 
 from ultralytics import YOLO
 

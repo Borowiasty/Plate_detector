@@ -1,5 +1,9 @@
-from asyncio.windows_events import NULL
+'''
+    Class for spliting video stream (from local machine) to frames, with returning these functionality
+'''
+
 import cv2
+from asyncio.windows_events import NULL
 
 class Video_splitter:
     def __init__(self, video_to_capture = ''):
@@ -16,11 +20,11 @@ class Video_splitter:
  
             if success:
                 self.splited_video.append(frame)
+                self.frames += 1 
         
             else:
                 break
-
-            self.frames += 1 
+           
 
     def get_frame(self, frame_no = 0):
         if frame_no > self.frames:
