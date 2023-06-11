@@ -25,7 +25,6 @@ class Video_splitter:
             else:
                 break
            
-
     def get_frame(self, frame_no = 0):
         if frame_no > self.frames:
             return NULL
