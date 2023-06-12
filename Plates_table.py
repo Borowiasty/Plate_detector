@@ -16,7 +16,7 @@ class Plates_local_databe:
 
     def add_plate(self, plate_to_add ):
         if len(plate_to_add) >= 5:
-            plate_to_add.upper()
+            plate_to_add = plate_to_add.upper()
             if not plate_to_add.isalpha() or not plate_to_add.isnumeric():
                 no_special = True
                 for charr in plate_to_add:
