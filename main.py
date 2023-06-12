@@ -10,11 +10,16 @@ from ultralytics import YOLO
 
 import Video_splitter
 import Video
+import Plates_table
 
 # setting model of YOLOv8 alorithm
 model = YOLO('custom_yolov8_model.pt')
 
-quit_cam = 0                                                                                                # for possible exit
+# delcaring var for possible exit
+quit_cam = 0                                                                                                
+
+# creating local in code database
+local_plates_databe = Plates_table.Plates_local_databe()
 
 # static camera seting
 camera_width = 640
@@ -69,14 +74,18 @@ while quit_cam == 0:
                 if len(result) == 1:
                     text = res[1]
                 
-                if len(result) > 1 and len(res[1]) > 6 and res[2] > 0.2:
+                if len(result) > 1 and len(res[1]) > 6 and res[2] > 0.7:
                     text = res[1]
-            print(text)
+            #print(text)
+            local_plates_databe.add_plate(text)
+            
+                
 
     #check if 'e' key is pressed, if so exit mian loop
     key = cv2.waitKey(1) & 0xFF
     if key == ord('e'):
         quit_cam = 1
 
+local_plates_databe.print_plates()
 cv2.destroyAllWindows()
 video_stream.stop()
