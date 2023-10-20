@@ -19,7 +19,9 @@ model = YOLO('custom_yolov8_model.pt')
 quit_cam = 0                                                                                                
 
 # creating local in code database
-local_plates_databe = Plates_table.Plates_local_databe()
+local_plates_databe = Plates_table.Plates_local_databe()                                                    # working mode
+#local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                           # debugging mode (show readed text)
+#local_plates_databe = Plates_table.Plates_local_databe(show = 2)                                           # debugging mode (show postprocessed number of plate)
 
 # static camera seting
 camera_width = 640
@@ -29,7 +31,7 @@ frames_per_sec_for_camera = 60
 # setting easyOCR reader parameters
 reader = easyocr.Reader(['en'], gpu = True)
 
-# video source, change operatring mode value for live 0, and from-local-machine 1
+# video source, change operatring mode value for live 0, and from-local-macheinee 1
 operating_mode = 1
 from_file_source = 'sample_video.mp4'
 video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()     # operating_mode = 0
@@ -56,7 +58,7 @@ while quit_cam == 0:
                 video_stream.stop()
                 quit(1)
     
-    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera)        # YOLO prediction
+    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)        # YOLO prediction
 
     for result in results:                                                                                  # operating in reasults from YOLO
         boxes = result.boxes.cpu().numpy()                                                                  # get boxes on cpu in numpy
@@ -64,7 +66,7 @@ while quit_cam == 0:
             r = box.xyxy[0].astype(int)                                                                     # get corner points as int
             img = cur_image[r[1]:r[3], r[0]:r[2]]                                                           # cut out interesting box
 
-            #cv2.imshow('frame',img)                                                                        # can show currently operated frame
+            cv2.imshow('frame',img)                                                                        # can show currently operated frame
             
             result = reader.readtext(img)                                                                   # reading text in images
 

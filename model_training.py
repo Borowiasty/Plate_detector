@@ -4,6 +4,7 @@
 
 from ultralytics import YOLO
 
-model = YOLO()
+model = YOLO('custom_yolov8_model.pt')
 
 model.train(data='car_license_plate.v1i.yolov8/data.yaml', epochs=120, imgsz=640)
+
