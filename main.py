@@ -2,7 +2,9 @@
     Main of program designed to recognize license plates in real time, made for Poznan Univeristy of Technology sem project
 '''
 
+import os
 import time
+import datetime
 import cv2
 import easyocr
 
@@ -19,9 +21,9 @@ model = YOLO('custom_yolov8_model.pt')
 quit_cam = 0                                                                                                
 
 # creating local in code database
-local_plates_databe = Plates_table.Plates_local_databe()                                                    # working mode
-#local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                           # debugging mode (show readed text)
-#local_plates_databe = Plates_table.Plates_local_databe(show = 2)                                           # debugging mode (show postprocessed number of plate)
+local_plates_databe = Plates_table.Plates_local_databe()                                                                    # working mode
+#local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
+#local_plates_databe = Plates_table.Plates_local_databe(show = 2)                                                           # debugging mode (show postprocessed number of plate)
 
 # static camera seting
 camera_width = 640
@@ -34,19 +36,19 @@ reader = easyocr.Reader(['en'], gpu = True)
 # video source, change operatring mode value for live 0, and from-local-macheinee 1
 operating_mode = 1
 from_file_source = 'sample_video.mp4'
-video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()     # operating_mode = 0
-static_video = Video_splitter.Video_splitter(from_file_source)                                              # operating_mode = 1
+video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()                     # operating_mode = 0
+static_video = Video_splitter.Video_splitter(from_file_source)                                                              # operating_mode = 1
 cur_frame_no = -1
 time.sleep(1)
 
 # mian loop
 while quit_cam == 0:
-    time.sleep(1/frames_per_sec_for_camera)                                                                 # setting framerate
+    time.sleep(1/frames_per_sec_for_camera)                                                                                 # setting framerate
 
     # based on selected operating mode
-    if operating_mode == 0:                                                                                 # live mode
+    if operating_mode == 0:                                                                                                 # live mode
         cur_image = video_stream.read() 
-    else:                                                                                                   # video mode
+    else:                                                                                                                   # video mode
         cur_frame_no += 1
 
         if cur_frame_no < static_video.get_count_frames():
@@ -58,27 +60,37 @@ while quit_cam == 0:
                 video_stream.stop()
                 quit(1)
     
-    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)        # YOLO prediction
+    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
 
-    for result in results:                                                                                  # operating in reasults from YOLO
-        boxes = result.boxes.cpu().numpy()                                                                  # get boxes on cpu in numpy
-        for box in boxes:                                                                                   # iterate boxes
-            r = box.xyxy[0].astype(int)                                                                     # get corner points as int
-            img = cur_image[r[1]:r[3], r[0]:r[2]]                                                           # cut out interesting box
 
-            cv2.imshow('frame',img)                                                                        # can show currently operated frame
+
+    for result in results:                                                                                                  # operating in reasults from YOLO
+        boxes = result.boxes.cpu().numpy()                                                                                  # get boxes on cpu in numpy
+        for box in boxes:                                                                                                   # iterate boxes
+            r = box.xyxy[0].astype(int)                                                                                     # get corner points as int
+            img = cur_image[r[1]:r[3], r[0]:r[2]]                                                                           # cut out interesting box
             
-            result = reader.readtext(img)                                                                   # reading text in images
+            '''
+            filename = str(datetime.datetime.now())                                                                         # can save detected plate do file
+            filename = filename.replace(' ', '_')
+            filename = filename.replace(':','-')
+            filename = filename.replace('.','-')
+            filename = os.path.dirname(__file__) + '\\cut_out_plates\\' + filename + '.png'
+            cv2.imwrite(filename, img)
+            '''
+            
+            #cv2.imshow('frame',img)                                                                                        # can show currently operated frame
+            
+            result = reader.readtext(img)                                                                                   # reading text in images
 
             text = ''
 
-            for res in result:                                                                              # getting text readed by easyOCR
+            for res in result:                                                                                              # getting text readed by easyOCR
                 if len(result) == 1:
                     text = res[1]
                 
                 if len(result) > 1 and len(res[1]) > 6 and res[2] > 0.7:
                     text = res[1]
-            #print(text)
             local_plates_databe.add_plate(text)
             
                 

@@ -38,9 +38,9 @@ class Plates_local_databe:
                         no_special = False
                         break
 
-                if no_special:
+                if no_special:                                                  # if string met our criteria we allow to write into database
 
-                    if self._show_operated_number == 2: print(plate_to_add)     # print added plate                                                  # if string met our criteria we allow to write into database
+                    if self._show_operated_number == 2: print(plate_to_add)     # print added plate                                                  
                     
                     if not self._check_plate_number(plate_to_add):              # check if license in not in local database allready
                         self._plates.append(plate_to_add)                       # and add it into list
