@@ -35,7 +35,8 @@ reader = easyocr.Reader(['en'], gpu = True)
 
 # video source, change operatring mode value for live 0, and from-local-macheinee 1
 operating_mode = 1
-from_file_source = 'sample_video.mp4'
+from_file_source = 'side_1.mp4'
+from_file_source = os.path.dirname(__file__) + '\\testing_video\\' + from_file_source
 video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()                     # operating_mode = 0
 static_video = Video_splitter.Video_splitter(from_file_source)                                                              # operating_mode = 1
 cur_frame_no = -1
@@ -61,6 +62,7 @@ while quit_cam == 0:
                 quit(1)
     
     results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
+    #results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
 
 
 
@@ -95,9 +97,7 @@ while quit_cam == 0:
             
                 
 
-    #check if 'e' key is pressed, if so exit mian loop
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('e'):
+    if cv2.waitKey(5) & 0xFF == ord('q'):
         quit_cam = 1
 
 local_plates_databe.print_plates()
