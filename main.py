@@ -97,7 +97,7 @@ while quit_cam == 0:
             
                 
 
-    if cv2.waitKey(5) & 0xFF == ord('q'):
+    if cv2.waitKey(5) & 0xFF == ord('e'):
         quit_cam = 1
 
 local_plates_databe.print_plates()
