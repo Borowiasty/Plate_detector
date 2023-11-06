@@ -3,3 +3,4 @@
 *.pyc
 model_training/
 cut_out_plates/
+model_training.py
