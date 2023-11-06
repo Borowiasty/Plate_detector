@@ -13,6 +13,8 @@ from ultralytics import YOLO
 import Video_splitter
 import Video
 import Plates_table
+import tensorflow as tf
+print(len(tf.config.experimental.list_physical_devices('GPU')))
 
 # setting model of YOLOv8 alorithm
 model = YOLO('custom_yolov8_model.pt')
@@ -61,8 +63,8 @@ while quit_cam == 0:
                 video_stream.stop()
                 quit(1)
     
-    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
-    #results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
+    #results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
+    results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
 
 
 
@@ -97,7 +99,7 @@ while quit_cam == 0:
             
                 
 
-    if cv2.waitKey(5) & 0xFF == ord('e'):
+    if cv2.waitKey(5) & 0xFF == ord('q'):
         quit_cam = 1
 
 local_plates_databe.print_plates()
