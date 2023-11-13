@@ -63,8 +63,8 @@ while quit_cam == 0:
                 video_stream.stop()
                 quit(1)
     
-    #results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
-    results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
+    results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
+    #results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
 
 
 
