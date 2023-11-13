@@ -1,6 +1,14 @@
 *.png
+*jpg
 *.mp4
 *.pyc
-model_training/
+*.yaml
+*.cache
+
+model_training/**/*.pt
+model_training/**/*.txt
+
+runs/
+ready_yolo_models/
 cut_out_plates/
 model_training.py
