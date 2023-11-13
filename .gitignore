@@ -4,6 +4,7 @@
 *.pyc
 *.yaml
 *.cache
+*.zip
 
 model_training/**/*.pt
 model_training/**/*.txt
