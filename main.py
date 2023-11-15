@@ -17,8 +17,7 @@ import tensorflow as tf
 print(len(tf.config.experimental.list_physical_devices('GPU')))
 
 # setting model of YOLOv8 alorithm
-model = YOLO('custom_yolov8_model.pt')
-
+model = YOLO('custom_yolov8.pt')
 # delcaring var for possible exit
 quit_cam = 0                                                                                                
 
@@ -38,6 +37,7 @@ reader = easyocr.Reader(['en'], gpu = True)
 # video source, change operatring mode value for live 0, and from-local-macheinee 1
 operating_mode = 1
 from_file_source = 'side_1.mp4'
+
 from_file_source = os.path.dirname(__file__) + '\\testing_video\\' + from_file_source
 video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()                     # operating_mode = 0
 static_video = Video_splitter.Video_splitter(from_file_source)                                                              # operating_mode = 1
@@ -62,6 +62,11 @@ while quit_cam == 0:
                 cv2.destroyAllWindows()
                 video_stream.stop()
                 quit(1)
+        else:
+            cv2.destroyAllWindows()
+            video_stream.stop()
+            print("End of video")
+            quit(0)
     
     results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
     #results = model.track(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False, persist= True)         # YOLO tracking [TODO]
