@@ -2,6 +2,7 @@
 import numpy as np
 import cv2
 import os
+import time
 
 from pathlib import Path
 from ultralytics import YOLO
@@ -42,8 +43,8 @@ class bounding_box_setter:
 		self.bounding_box.append(self.size[0])
 		self.bounding_box.append(self.size[1])
 		
-
-path_of_yolo = os.path.dirname(__file__) + '\\custom_yolov8.pt'
+model_name = 'dataset3_v2.pt'
+path_of_yolo = os.path.dirname(__file__) + '\\ready_yolo_models\\' + model_name 
 model = YOLO(path_of_yolo)
 
 
@@ -71,9 +72,9 @@ def bb_intersection_over_union(boxA, boxB):
 	# return the intersection over union value
 	return iou
 
-
 counter = 0
 mean = 0.0
+time_of_start = time.time()
 for p in Path('.').glob('**/dataset_1/test/**/*.jpg'):
 	image_path = str(p)
 	ground_truth = str(p)
@@ -109,7 +110,10 @@ for p in Path('.').glob('**/dataset_1/test/**/*.jpg'):
 
 					#cv2.imshow("Image", image_file)
 					#cv2.waitKey(0)
-	
+time_of_end = time.time()
+
 mean = mean / counter
 
-print(mean)
+print("\n-----  ", model_name, "  -----")
+print("Mean UoI: ", mean)
+print("Working time: ", time_of_end-time_of_start, "\n")
