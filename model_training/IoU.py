@@ -43,11 +43,6 @@ class bounding_box_setter:
 		self.bounding_box.append(self.size[0])
 		self.bounding_box.append(self.size[1])
 		
-model_name = 'dataset3_v2.pt'
-path_of_yolo = os.path.dirname(__file__) + '\\ready_yolo_models\\' + model_name 
-model = YOLO(path_of_yolo)
-
-
 
 def bb_intersection_over_union(boxA, boxB):
 	# determine the (x, y)-coordinates of the intersection rectangle
@@ -72,48 +67,69 @@ def bb_intersection_over_union(boxA, boxB):
 	# return the intersection over union value
 	return iou
 
-counter = 0
-mean = 0.0
-time_of_start = time.time()
-for p in Path('.').glob('**/dataset_1/test/**/*.jpg'):
-	image_path = str(p)
-	ground_truth = str(p)
-	ground_truth_path = ground_truth[:ground_truth.find('images')] + 'labels' + ground_truth[ground_truth.find('images')+6:-3] + 'txt'
 
-	if(os.path.isfile(image_path) and os.path.isfile(ground_truth_path)):
-		image_file = cv2.imread(image_path)
-		
-		ground_truth_file = open(ground_truth_path, 'r')
+model_names = ['dataset1_v1.pt', 'dataset1_v1.pt', 'dataset1_v2.pt', 'dataset2_v1.pt', 'dataset3_v1.pt', 'dataset3_v2.pt', 'dataset3_v3.pt', 'dataset3_v4.pt', 'dataset4_v1.pt', 'dataset4_v2.pt', 'dataset4_v3.pt', 'dataset4_v4.pt', 'dataset5_v1.pt', 'dataset5_v2.pt', 'dataset5_v3.pt', 'dataset5_v4.pt']
 
-		ground_truth_from_file = ground_truth_file.read()
-		if(ground_truth_from_file.find('\n') == -1):
-			ground_truth_from_file = ground_truth_from_file[2:]
+file = open(os.path.dirname(__file__) + '\\acuracy_testing\\results.txt', 'w')
+
+for model_name in model_names:
+	path_of_yolo = os.path.dirname(__file__) + '\\ready_yolo_models\\' + model_name 
+	model = YOLO(path_of_yolo)
+	print(model_name)
+	counter = 0
+	mean = 0.0
+	i_range = 100
+
+	time_of_start = time.time()
+	for i in range(i_range):
+		#print(i)
+		for p in Path('.').glob('**/acuracy_testing/photo_for_acuracy_testing/**/*.jpg'):
+			image_path = str(p)
+			ground_truth = str(p)
+			ground_truth_path = ground_truth[:ground_truth.find('images')] + 'labels' + ground_truth[ground_truth.find('images')+6:-3] + 'txt'
+			#print(image_path)
+
+			if(os.path.isfile(image_path) and os.path.isfile(ground_truth_path)):
+				image_file = cv2.imread(image_path)
 				
-			curr_bounding = bounding_box_setter(ground_truth_from_file)
-			curr_bounding.de_normalizer(image_file)
-			
-			results = model.predict(source = image_path, show = False,  verbose=False)         # YOLO prediction
-			for result in results:
-				boxes = result.boxes.cpu().numpy()
-				for box in boxes:
-					r = box.xywh[0].astype(int)
+				ground_truth_file = open(ground_truth_path, 'r')
 
-					cv2.rectangle(image_file, curr_bounding.bounding_box, (0, 255, 0), 2)
-					cv2.rectangle(image_file, [int(r[0]-0.5*r[2]), int(r[1]-0.5*r[3]), r[2], r[3]] , (255, 0, 0), 2)
+				ground_truth_from_file = ground_truth_file.read()
+				if(ground_truth_from_file.find('\n') == -1):
+					ground_truth_from_file = ground_truth_from_file[2:]
+						
+					curr_bounding = bounding_box_setter(ground_truth_from_file)
+					curr_bounding.de_normalizer(image_file)
+					
+					results = model.predict(source = image_path, show = False,  verbose=False)         # YOLO prediction
+					for result in results:
+						boxes = result.boxes.cpu().numpy()
+						for box in boxes:
+							r = box.xywh[0].astype(int)
 
-					# compute the intersection over union and display it
-					iou = bb_intersection_over_union(curr_bounding.bounding_box, [int(r[0]-0.5*r[2]), int(r[1]-0.5*r[3]), r[2], r[3]])
-					counter = counter + 1
-					mean = mean + iou
-					cv2.putText(image_file, "IoU: {:.4f}".format(iou), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-					#print("{}: {:.4f}".format(image_path, iou))
+							cv2.rectangle(image_file, curr_bounding.bounding_box, (0, 255, 0), 2)
+							cv2.rectangle(image_file, [int(r[0]-0.5*r[2]), int(r[1]-0.5*r[3]), r[2], r[3]] , (255, 0, 0), 2)
 
-					#cv2.imshow("Image", image_file)
-					#cv2.waitKey(0)
-time_of_end = time.time()
+							# compute the intersection over union and display it
+							iou = bb_intersection_over_union(curr_bounding.bounding_box, [int(r[0]-0.5*r[2]), int(r[1]-0.5*r[3]), r[2], r[3]])
+							counter = counter + 1
+							mean = mean + iou
+							cv2.putText(image_file, "IoU: {:.4f}".format(iou), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+							#print("{}: {:.4f}".format(image_path, iou))
 
-mean = mean / counter
+							#cv2.imshow("Image", image_file)
+							#cv2.waitKey(0)
+	time_of_end = time.time()
+	mean = mean / counter
 
-print("\n-----  ", model_name, "  -----")
-print("Mean UoI: ", mean)
-print("Working time: ", time_of_end-time_of_start, "\n")
+	#print("\n-----  ", model_name, "  -----")
+	#print("Mean UoI: ", mean)
+	#print("Working time: ", time_of_end-time_of_start)
+	#print("Mean time of 1 epoch: ", (time_of_end-time_of_start)/i_range, "\n")
+	
+	string_to_file = "-----  " + str(model_name) + "  -----" + "\nMean UoI: " + str(mean).replace('.',',') + "\nMean time of 1 epoch: " + str((time_of_end-time_of_start)/i_range).replace('.',',') + "\n\n"
+	file.write(string_to_file)
+
+
+file.close()
+print("DONE")
