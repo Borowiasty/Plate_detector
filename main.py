@@ -7,6 +7,7 @@ import time
 import datetime
 import cv2
 import easyocr
+import threading
 
 from ultralytics import YOLO
 
@@ -21,8 +22,11 @@ model = YOLO('custom_yolov8.pt')
 # delcaring var for possible exit
 quit_cam = 0                                                                                                
 
+#creating lock for local database multithread
+lock = threading.Lock()
+
 # creating local in code database
-local_plates_databe = Plates_table.Plates_local_databe()                                                                    # working mode
+local_plates_databe = Plates_table.Plates_local_databe()                                                                # working mode
 #local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
 #local_plates_databe = Plates_table.Plates_local_databe(show = 2)                                                           # debugging mode (show postprocessed number of plate)
 

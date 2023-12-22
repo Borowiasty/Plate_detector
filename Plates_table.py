@@ -3,23 +3,25 @@
 '''
 
 class Plates_local_databe:
-    def __init__(self, show = 0):
+    def __init__(self, lock, show = 0):
         self._plates = []
         self._show_operated_number = show
+        self.lock = lock
     
     def _check_plate_number(self, plate_to_be_checked):                         # checker if plate is in class's list used as databe
         is_in_database = False
-
+        self.lock.acquire()
         for plate in self._plates:
             if plate == plate_to_be_checked:
                 is_in_database = True
                 break
             else:
                 continue
+        self.lock.release()
 
         return is_in_database
 
-    def add_plate(self, plate_to_add ):                                         # only metod accesable from outside of class, check criteria and add plate to list 
+    def _check_plate_meet_criteria(self, plate_to_add):                         # check criteria and add plate to list 
         
         if self._show_operated_number == 1: print(plate_to_add)                 # print full readed text
 
@@ -43,27 +45,38 @@ class Plates_local_databe:
                     if self._show_operated_number == 2: print(plate_to_add)     # print added plate                                                  
                     
                     if not self._check_plate_number(plate_to_add):              # check if license in not in local database allready
-                        self._plates.append(plate_to_add)                       # and add it into list
                         return True
                     else:
                         return False
             else:                                                               # if string met our criteria we allow to write into database
                 if not self._check_plate_number(plate_to_add):                  # check if license in not in local database allready
-                    self._plates.append(plate_to_add)                           # and add it into list
                     return True                                                     
                 else:
                     return False
     
-    def delete_plate(self, plate_to_delete):                                    # deleter particullar plate from list [TODO]
+    def add_plate(self, plate_to_add):
+        if self._check_plate_meet_criteria(self, plate_to_add):
+            self.lock.acquire()
+            self._plates.append(plate_to_add)
+            self.lock.release()
+            return True
+        else:
+            return False
+    
+    def delete_plate(self, plate_to_delete):                                    # deleter particullar plate from list 
             if self._check_plate_number(plate_to_delete):                       # check if plate is in database so we don't get error
-                self._plates.pop(plate_to_delete)                               # and delete [TODO]
+                self.lock.acquire()
+                self._plates.pop(plate_to_delete)                               # and delete 
+                self.lock.release()
                 return True
             else:
                 return False
 
     def print_plates(self):
         print('Local plates:')
+        self.lock.acquire()
         for plate in self._plates:
             print(plate)
+        self.lock.release()
 
     
