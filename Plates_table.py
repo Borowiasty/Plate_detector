@@ -55,13 +55,15 @@ class Plates_local_databe:
                     return False
     
     def add_plate(self, plate_to_add):
-        if self._check_plate_meet_criteria(self, plate_to_add):
+        #if self._check_plate_meet_criteria(plate_to_add):
+        if not self._check_plate_number(plate_to_add):
             self.lock.acquire()
             self._plates.append(plate_to_add)
             self.lock.release()
             return True
         else:
             return False
+        
     
     def delete_plate(self, plate_to_delete):                                    # deleter particullar plate from list 
             if self._check_plate_number(plate_to_delete):                       # check if plate is in database so we don't get error
