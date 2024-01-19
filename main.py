@@ -16,6 +16,7 @@ import Video_splitter
 import Video
 import Plates_table
 import TrOCR_reader
+import Db_connector
 
 print("Using GPU: ", torch.cuda.get_device_name(torch.cuda.current_device()))
 
@@ -30,7 +31,14 @@ lock = threading.Lock()
 # creating local in code database
 local_plates_databe = Plates_table.Plates_local_databe(lock)                                                                # working mode
 #local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
-#local_plates_databe = Plates_table.Plates_local_databe(lock, show = 2)                                                           # debugging mode (show postprocessed number of plate)
+#local_plates_databe = Plates_table.Plates_local_databe(lock, show = 2)                                                     # debugging mode (show postprocessed number of plate)
+
+#creating database connection
+database = Db_connector.Db_connector("localhost", "root", "root", "plate_detector", lock)
+database.start_db_supervison(local_plates_databe)
+if not database.is_connected:
+    print("Database connection error")
+    quit(1)
 
 # static camera seting
 camera_width = 640
@@ -83,7 +91,7 @@ while quit_cam == 0:
             print("End of video")
             break
     if cur_frame_no % 5 == 0:
-        results = model.predict(source = cur_image, show = False, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
+        results = model.predict(source = cur_image, show = True, vid_stride = frames_per_sec_for_camera, verbose=False)         # YOLO prediction
 
         for result in results:                                                                                                  # operating in reasults from YOLO
             boxes = result.boxes.cpu().numpy()                                                                                  # get boxes on cpu in numpy
@@ -102,7 +110,9 @@ while quit_cam == 0:
                     text = result[0]
 
                     local_plates_databe.add_plate(text)
-            
+
+    if cur_frame_no % 100 == 0 and cur_frame_no > 1:
+        database.synchronize = True
                 
 
     if cv2.waitKey(5) & 0xFF == ord('q'):
@@ -114,7 +124,7 @@ TP = 0
 FP = 0
 FN = 0
 once_upon_a_time_there_was_a_plate = []
-for plate in local_plates_databe._plates:
+for plate in local_plates_databe.get_local_plates():
     if plate in side_1_GT:
         once_upon_a_time_there_was_a_plate.append(plate)
         TP += 1
@@ -138,3 +148,4 @@ print("Mean fps: ", str(float(static_video.get_count_frames()/(time_of_end-time_
 print(res_sum/res_num)
 cv2.destroyAllWindows()
 video_stream.stop()
+database.stop_db_supervisor()
