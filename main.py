@@ -27,11 +27,13 @@ quit_cam = 0
 
 #creating lock for local database multithread
 lock = threading.Lock()
+lock_2 = threading.Lock()
 
 # creating local in code database
 local_plates_databe = Plates_table.Plates_local_databe(lock)                                                                # working mode
 #local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
 #local_plates_databe = Plates_table.Plates_local_databe(lock, show = 2)                                                     # debugging mode (show postprocessed number of plate)
+local_plates_databe_backup = Plates_table.Plates_local_databe(lock_2)
 
 #creating database connection
 database = Db_connector.Db_connector("localhost", "root", "root", "plate_detector", lock)
@@ -110,6 +112,7 @@ while quit_cam == 0:
                     text = result[0]
 
                     local_plates_databe.add_plate(text)
+                    local_plates_databe_backup.add_plate(text)
 
     if cur_frame_no % 100 == 0 and cur_frame_no > 1:
         database.synchronize = True
@@ -119,12 +122,15 @@ while quit_cam == 0:
         quit_cam = 1
 
 time_of_end = time.time()
-local_plates_databe.print_plates()
+database.synchronize = True
+time.sleep(10)
+
+local_plates_databe_backup.print_plates()
 TP = 0
 FP = 0
 FN = 0
 once_upon_a_time_there_was_a_plate = []
-for plate in local_plates_databe.get_local_plates():
+for plate in local_plates_databe_backup.get_local_plates():
     if plate in side_1_GT:
         once_upon_a_time_there_was_a_plate.append(plate)
         TP += 1
