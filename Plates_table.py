@@ -9,18 +9,19 @@ class Plates_local_databe:
         self.lock = lock
     
     def _check_plate_number(self, plate_to_be_checked):                         # checker if plate is in class's list used as databe
-        is_in_database = False
+        number_in_database = -1
         self.lock.acquire()
-        for plate in self._plates:
-            if plate == plate_to_be_checked:
-                is_in_database = True
+        for i in range(len(self._plates)):
+            if self._plates[i] == plate_to_be_checked:
+                number_in_database = i
                 break
             else:
                 continue
         self.lock.release()
 
-        return is_in_database
-
+        return number_in_database
+    
+    '''
     def _check_plate_meet_criteria(self, plate_to_add):                         # check criteria and add plate to list 
         
         if self._show_operated_number == 1: print(plate_to_add)                 # print full readed text
@@ -53,10 +54,11 @@ class Plates_local_databe:
                     return True                                                     
                 else:
                     return False
-    
+    '''
+
     def add_plate(self, plate_to_add):
         #if self._check_plate_meet_criteria(plate_to_add):
-        if not self._check_plate_number(plate_to_add):
+        if self._check_plate_number(plate_to_add) == -1:
             self.lock.acquire()
             self._plates.append(plate_to_add)
             self.lock.release()
@@ -65,14 +67,18 @@ class Plates_local_databe:
             return False
         
     
-    def delete_plate(self, plate_to_delete):                                    # deleter particullar plate from list 
-            if self._check_plate_number(plate_to_delete):                       # check if plate is in database so we don't get error
+    def delete_plate(self, plate_to_delete):                                            # deleter particullar plate from list 
+            position_in_local_database = self._check_plate_number(plate_to_delete)
+            if position_in_local_database != -1:                                        # check if plate is in database so we don't get error
                 self.lock.acquire()
-                self._plates.pop(plate_to_delete)                               # and delete 
+                self._plates.pop(position_in_local_database)                            # and delete 
                 self.lock.release()
                 return True
             else:
                 return False
+
+    def get_local_plates(self):
+        return self._plates
 
     def print_plates(self):
         print('Local plates:')
