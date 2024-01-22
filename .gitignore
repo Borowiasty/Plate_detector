@@ -5,6 +5,7 @@
 *.yaml
 *.cache
 *.zip
+*.xlsx
 
 model_training/**/*.pt
 model_training/**/*.txt
