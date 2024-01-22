@@ -1,6 +1,6 @@
 from pathlib import Path
 
-for p in Path('.').glob('**/dataset_3/**/*.txt'):
+for p in Path('.').glob('**/dataset_6/**/*.txt'):
     content = p.read_text()
     if content != '':
         if content[0] == '1':

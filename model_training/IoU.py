@@ -68,8 +68,14 @@ def bb_intersection_over_union(boxA, boxB):
 	return iou
 
 
-model_names = ['dataset1_v1.pt', 'dataset1_v1.pt', 'dataset1_v2.pt', 'dataset2_v1.pt', 'dataset3_v1.pt', 'dataset3_v2.pt', 'dataset3_v3.pt', 'dataset3_v4.pt', 'dataset4_v1.pt', 'dataset4_v2.pt', 'dataset4_v3.pt', 'dataset4_v4.pt', 'dataset5_v1.pt', 'dataset5_v2.pt', 'dataset5_v3.pt', 'dataset5_v4.pt']
+model_names = ['dataset1_v1.pt', 'dataset1_v1.pt', 'dataset1_v2.pt', 
+			   'dataset2_v1.pt', 
+			   'dataset3_v1.pt', 'dataset3_v2.pt', 'dataset3_v3.pt', 'dataset3_v4.pt', 
+			   'dataset4_v1.pt', 'dataset4_v2.pt', 'dataset4_v3.pt', 'dataset4_v4.pt', 
+			   'dataset5_v1.pt', 'dataset5_v2.pt', 'dataset5_v3.pt', 'dataset5_v4.pt', 
+			   'dataset6_v1.pt', 'dataset6_v2.pt', 'dataset6_v3.pt', 'dataset6_v4.pt', 'dataset6_v5.pt', 'dataset6_v6.pt']
 
+#model_names = ['dataset6_v1.pt', 'dataset6_v2.pt', 'dataset6_v3.pt', 'dataset6_v4.pt', 'dataset6_v5.pt', 'dataset6_v6.pt']
 file = open(os.path.dirname(__file__) + '\\acuracy_testing\\results.txt', 'w')
 
 for model_name in model_names:
@@ -78,7 +84,7 @@ for model_name in model_names:
 	print(model_name)
 	counter = 0
 	mean = 0.0
-	i_range = 100
+	i_range = 1
 
 	time_of_start = time.time()
 	for i in range(i_range):
@@ -95,7 +101,7 @@ for model_name in model_names:
 				ground_truth_file = open(ground_truth_path, 'r')
 
 				ground_truth_from_file = ground_truth_file.read()
-				if(ground_truth_from_file.find('\n') == -1):
+				if(ground_truth_from_file.find('\n') == -1 and ground_truth_from_file != ''):
 					ground_truth_from_file = ground_truth_from_file[2:]
 						
 					curr_bounding = bounding_box_setter(ground_truth_from_file)
