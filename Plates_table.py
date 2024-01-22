@@ -5,6 +5,7 @@
 class Plates_local_databe:
     def __init__(self, lock, show = 0):
         self._plates = []
+        self._plates_backup = []
         self._show_operated_number = show
         self.lock = lock
     
@@ -13,6 +14,19 @@ class Plates_local_databe:
         self.lock.acquire()
         for i in range(len(self._plates)):
             if self._plates[i] == plate_to_be_checked:
+                number_in_database = i
+                break
+            else:
+                continue
+        self.lock.release()
+
+        return number_in_database
+    
+    def _check_plate_number_backup(self, plate_to_be_checked):                         # checker if plate is in class's list used as databe
+        number_in_database = -1
+        self.lock.acquire()
+        for i in range(len(self._plates_backup)):
+            if self._plates_backup[i] == plate_to_be_checked:
                 number_in_database = i
                 break
             else:
@@ -58,9 +72,10 @@ class Plates_local_databe:
 
     def add_plate(self, plate_to_add):
         #if self._check_plate_meet_criteria(plate_to_add):
-        if self._check_plate_number(plate_to_add) == -1:
+        if self._check_plate_number_backup(plate_to_add) == -1:
             self.lock.acquire()
             self._plates.append(plate_to_add)
+            self._plates_backup.append(plate_to_add)
             self.lock.release()
             return True
         else:
@@ -79,11 +94,21 @@ class Plates_local_databe:
 
     def get_local_plates(self):
         return self._plates
+    
+    def get_local_plates_backup(self):
+        return self._plates_backup
 
     def print_plates(self):
         print('Local plates:')
         self.lock.acquire()
         for plate in self._plates:
+            print(plate)
+        self.lock.release()
+
+    def print_plates_backup(self):
+        print('Local backup plates:')
+        self.lock.acquire()
+        for plate in self._plates_backup:
             print(plate)
         self.lock.release()
 

@@ -32,6 +32,7 @@ class Db_connector:
         self.lock = lock
         
         self.synchronize = False
+        self.last_processed = ''
 
     def start_db_supervison(self, Plates_local_databe):
         Thread(target= self._db_supervisor, args= (Plates_local_databe,)).start()
@@ -50,20 +51,23 @@ class Db_connector:
                         bufor = Plates_local_databe.get_local_plates()[-1]
                         self.lock.release()
                         Plates_local_databe.delete_plate(bufor)
-                        if self._check_exist(bufor):
-                            if not self._check_ticket(bufor):
-                                self._add_fine(bufor)
-                                print(bufor, "got fine")
-                                #cv2.waitKey()
-                        else:
-                            self._add_exception(bufor)
+                        if bufor != self.last_processed:
+                            self.last_processed = bufor
+                            if self._check_exist(bufor):
+                                if not self._check_ticket(bufor):
+                                    self._add_fine(bufor)
+                                    print(bufor, "got fine")
+                                    #cv2.waitKey()
+                            else:
+                                self._add_exception(bufor)
+
                     else:
                         self.synchronize = False
                 else:
                     time.sleep(10)
                 
 
-    def _check_ticket(self, plate_no):
+    def _check_ticket(self, plate_no): 
         Q = 'SELECT COUNT(tickets.ticket_id) FROM plate_detector.tickets WHERE  number_plate = (SELECT plates.plate_id FROM plate_detector.plates WHERE plates.plate_no = "' + plate_no + '")'
         self._cursor.execute(Q)
         results = [i[0] for i in self._cursor]

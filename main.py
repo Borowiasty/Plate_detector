@@ -4,13 +4,11 @@
 
 import os
 import time
-import datetime
 import cv2
 import threading
 import torch
 
 from ultralytics import YOLO
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 import Video_splitter
 import Video
@@ -27,17 +25,15 @@ quit_cam = 0
 
 #creating lock for local database multithread
 lock = threading.Lock()
-lock_2 = threading.Lock()
 
 # creating local in code database
-local_plates_databe = Plates_table.Plates_local_databe(lock)                                                                # working mode
-#local_plates_databe = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
-#local_plates_databe = Plates_table.Plates_local_databe(lock, show = 2)                                                     # debugging mode (show postprocessed number of plate)
-local_plates_databe_backup = Plates_table.Plates_local_databe(lock_2)
+local_plates_database = Plates_table.Plates_local_databe(lock)                                                                # working mode
+#local_plates_database = Plates_table.Plates_local_databe(show = 1)                                                           # debugging mode (show readed text)
+#local_plates_database = Plates_table.Plates_local_databe(lock, show = 2)                                                     # debugging mode (show postprocessed number of plate)
 
 #creating database connection
 database = Db_connector.Db_connector("localhost", "root", "root", "plate_detector", lock)
-database.start_db_supervison(local_plates_databe)
+database.start_db_supervison(local_plates_database)
 if not database.is_connected:
     print("Database connection error")
     quit(1)
@@ -55,9 +51,9 @@ reader = TrOCR_reader.TrOCR_reader_class(model_size = model_size, whitelist = wh
 
 # video source, change operatring mode value for live 0, and from-local-macheinee 1
 operating_mode = 1
-from_file_source = 'side_1.mp4'
+from_file_source = 'side.mp4'
 
-side_1_GT = ['CB442EP', 'PGN395FN',  'PO5NV18', 'PO1G171', 'PO198LV', 'PO3J325', 'PO216SP', 'PSR4708A', 'PO5WG20', 'PO720VR', 'PZ1K733', 'PKRNW25', 'PO6TO95', 'PGN540KR', 'PO7GR66', 'PZ2PO15', 'PGSYT99', 'PZ215YS', 'PO5JS32', 'CMG03U4', 'PO2KK47', 'PO1AN55']
+side_GT = ['PO1RU65', 'PY32166', 'PZ8990W', 'WE5F183', 'PO3152E', 'PO6505H', 'PO4RR98', 'PO5NY07', 'PO6HX56', 'PY22520', 'PO392RF', 'EL331VR', 'PJARU55', 'PO697FV', 'PO189CT', 'PKR55619', 'PO9362F', 'PO364PS', 'PO7RV44', 'PO178UH', 'PO445LE', 'PO6LX99', 'PO2XU12', 'POS02563', 'PO9S177', 'PGN871CS']
 
 from_file_source = os.path.dirname(__file__) + '\\testing_video\\' + from_file_source
 video_stream = Video.Camera_stream((camera_width, camera_height), frames_per_sec_for_camera, 0).start()                     # operating_mode = 0
@@ -106,13 +102,12 @@ while quit_cam == 0:
                 resolution = float(len(img[0]) / len(img))
                 res_num += 1
                 res_sum += resolution
-                if resolution >= 3.5 and resolution <= 4.9:
+                if resolution >= 4 and resolution <= 4.9:
                     result = reader.text_from_image(img)                                                                        # reading text in images
 
                     text = result[0]
 
-                    local_plates_databe.add_plate(text)
-                    local_plates_databe_backup.add_plate(text)
+                    local_plates_database.add_plate(text)
 
     if cur_frame_no % 100 == 0 and cur_frame_no > 1:
         database.synchronize = True
@@ -123,27 +118,31 @@ while quit_cam == 0:
 
 time_of_end = time.time()
 database.synchronize = True
-time.sleep(10)
 
-local_plates_databe_backup.print_plates()
+while len(local_plates_database.get_local_plates()) > 0:
+    time.sleep(1)
+
+local_plates_database.print_plates()
+local_plates_database.print_plates_backup()
 TP = 0
 FP = 0
 FN = 0
 once_upon_a_time_there_was_a_plate = []
-for plate in local_plates_databe_backup.get_local_plates():
-    if plate in side_1_GT:
+for plate in local_plates_database.get_local_plates_backup():
+    if plate in side_GT:
         once_upon_a_time_there_was_a_plate.append(plate)
         TP += 1
     else:
         FP += 1
 
-for plate in side_1_GT:
+for plate in side_GT:
     if plate in once_upon_a_time_there_was_a_plate:
         continue
     else:
         FN += 1
 
-print("All plates: ", len(side_1_GT))
+print("All plates: ", len(side_GT))
+print("All detected plates: ", len(local_plates_database.get_local_plates_backup()))
 print("Positive detected plates: ", TP)
 print("Plates detected but don't exist: ", FP)
 print("Plates undetected: ", FN)
